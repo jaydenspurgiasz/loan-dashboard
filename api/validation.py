@@ -1,9 +1,9 @@
 from fastapi import HTTPException
-import pandera as pa
+import pandera.pandas as pa
 import pandas as pd
-from pandera import Column, DataFrameSchema, Check
+from pandera.pandas import Column, DataFrameSchema, Check
 import io
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 
 
@@ -12,7 +12,7 @@ schema = DataFrameSchema({
     "fed_funds_rate": Column(pa.Float, Check.in_range(0, 100), coerce=True),
     "unemployment_rate": Column(pa.Float, Check.in_range(0, 100), coerce=True),
     "debt_service_ratio": Column(pa.Float, Check.in_range(0, 100), coerce=True),
-    "revol_util": Column(pa.Float, Check.in_range(0, 100), coerce=True),
+    "revol_util": Column(pa.Float, Check.in_range(0, 120), coerce=True),
 
     "loan_amnt": Column(pa.Float, Check.ge(0), coerce=True),
     "installment": Column(pa.Float, Check.ge(0), coerce=True),
@@ -29,7 +29,7 @@ schema = DataFrameSchema({
     "issue_month": Column(pa.Float, Check.in_range(1, 12), coerce=True),
     "term": Column(pa.Float, Check.isin([36, 60]), coerce=True),
     "emp_length": Column(pa.Float, Check.in_range(-1, 10), coerce=True),
-    "dti": Column(pa.Float, Check.in_range(-1, 100), coerce=True),
+    "dti": Column(pa.Float, Check.ge(-1), coerce=True),
     "inq_last_6mths": Column(pa.Float, Check.in_range(0, 10), coerce=True),
     "fico_score": Column(pa.Float, Check.in_range(350, 850), coerce=True),
     "cpi": Column(pa.Float, Check.in_range(100, 500), coerce=True),
@@ -44,10 +44,10 @@ schema = DataFrameSchema({
     ]), coerce=True),
 })
 
-def validate_input(df) -> Tuple[bool, pa.DataFrame | None]:
+def validate_input(df: pd.DataFrame) -> Tuple[bool, Optional[pd.DataFrame]]:
     try:
         schema.validate(df)
-        return True, None
+        return True, None   
     except pa.errors.SchemaErrors as e:
         return False, e.failure_cases
 
@@ -71,7 +71,7 @@ def tofloat(x):
 
 def clean_input(file: bytes) -> pd.DataFrame:
     if len(file) > 10**7:
-        raise HTTPException(status_code=413, detail="File size exceeds 10MB limit.")
+        raise HTTPException(status_code=413, detail="CSV too large (>10MB)")
     
     df = pd.read_csv(io.BytesIO(file))
     
