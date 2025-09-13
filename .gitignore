@@ -5,6 +5,8 @@
 
 /api/loan-api
 
+/web/.env.local
+
 # dependencies
 /web/node_modules
 /web/.pnp
