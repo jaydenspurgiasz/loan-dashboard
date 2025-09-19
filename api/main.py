@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from validation import clean_input
@@ -15,7 +15,7 @@ import lightgbm
 
 API_TITLE = "Loan Dashboard API"
 MODEL_PATH = "artifacts/lgbm_model.pkl"
-MAX_BYTES = 10**7
+MAX_BYTES = 10*1024*1024  # 10MB
 ORIGINS = ["http://localhost:3000"]
 MODEL = None
 
@@ -101,7 +101,7 @@ async def validate(file: UploadFile = File(...)):
 
 
 @app.post("/score")
-async def score(file: UploadFile = File(...), fp: str | None = None):
+async def score(file: UploadFile = File(...), fp: str = Form(...)):
     # Score the uploaded data and add loan_risk column to IndexedDB data
     blob = await file.read()
     if len(blob) > MAX_BYTES:

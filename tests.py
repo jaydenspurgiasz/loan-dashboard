@@ -19,12 +19,12 @@ with open('ztestdata/test_book.csv', 'rb') as f:
         print(response.json())
         key = response.json().get('key')
     except Exception as e:
-        print(f"Error occurred:\n{e}")
+        print(f"Error occurred:\n{str(e)}")
 
 
 with open('ztestdata/test_book.csv', 'rb') as f:
     try:
-        response = requests.post('http://localhost:8000/score', files={'file': ('test_book.csv', f, 'text/csv')}, params={'fp': key})
+        response = requests.post('http://localhost:8000/score', files={'file': ('test_book.csv', f, 'text/csv')}, data={'fp': key})
         print(response.json())
     except Exception as e:
-        print(f"Error occurred:\n{e.msg}")
+        print(f"Error occurred:\n{str(e)}")
