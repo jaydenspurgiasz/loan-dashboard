@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  turbopack: {
+    root: "C:/Users/spurg/Documents/Marshall-Wace/loan-dashboard/web",
+  },
 };
 
 export default nextConfig;

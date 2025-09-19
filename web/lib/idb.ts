@@ -1,3 +1,5 @@
+"use client"
+
 import { get, set, del, keys } from "idb-keyval";
 
 const KEY_PREFIX = "loan-csv:";
@@ -15,8 +17,14 @@ export type StoredCSV = {
 export async function saveCSV(file: File, fp: string) {
   // Save the blob and metadata to IndexedDB
   try {
+    // Clear IndexedDB
+    const keys = await listCSVKeys();
+    for (let key of keys) {
+      delCSV(key);
+    }
+
     const payload: StoredCSV = {
-      blob: new Blob([file], { type: file.type }),
+      blob: new Blob([file], { type: "text/csv" }),
       name: file.name || "loan_book.csv",
       type: file.type || "text/csv",
       size: file.size || (file as Blob).size,
