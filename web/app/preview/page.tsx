@@ -4,15 +4,22 @@ import { useRouter } from 'next/navigation'
 import { getCSV, getCurrentKey, saveCSV } from '@/lib/idb'
 import { FilePreview, getPreview } from '@/lib/fileParse';
 import {scoreFile} from '@/lib/actions/fileActions';
+import Container from '@/components/Container';
+import Card from '@/components/Card';
+import MetaGrid from '@/components/MetaGrid';
+import CSVPreview from '@/components/CSVPreview';
 
 export default function Preview() {
   const router = useRouter();
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<FilePreview>({ head: [], tail: [], metadata: { rows: 0, cols: 0 } });
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const fetchKeyAndFile = async () => {
+      setBusy(true);
       const key = await getCurrentKey();
       const filePromise = await getCSV(key!);
       setFile(filePromise);
@@ -25,8 +32,11 @@ export default function Preview() {
         try {
           const csv = await getPreview(file);
           setPreview(csv!);
+          setBusy(false);
+          setError(null);
         } catch (error) {
           console.error("Error parsing CSV:", error);
+          setError("Error parsing CSV: " + error);
         }
       }
     }
@@ -36,44 +46,33 @@ export default function Preview() {
   const handleSubmit = async () => {
     // Score, then go to analysis page
     try {
+      setBusy(true);
       const res: File = await scoreFile(file!, getCurrentKey()!);
       await saveCSV(res, await getCurrentKey()!);
     } catch (error) {
       console.error("Error scoring file: ", error);
     }
+    setBusy(false);
     router.push('/analyze');
   }
 
   return (
-    <div>
-      <div>File name: {file?.name}, Rows: {preview.metadata.rows}, Columns: {preview.metadata.cols}, Size: {file?.size} bytes</div>
-      <div>Preview:</div>
-      <div style={{ overflowX: 'auto', width: '100%' }}>
-        <table style={{ overflowX: 'auto', borderCollapse: 'separate', width: '100%' , borderSpacing: '30px 0'}}><tbody>
-          {
-            preview.head.map((line, index) => (
-              <tr key={index}>
-                {line.split(",").map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
-                ))}
-              </tr>
-            ))
-          }
-          <tr><td colSpan={preview.metadata.cols}>...</td></tr>
-          {
-            preview.tail.map((line, index) => (
-              <tr key={index}>
-                {line.split(",").map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
-                ))}
-              </tr>
-            ))
-          }
-        </tbody></table>
+    <Container>
+      <div className="grid gap-6">
+        <Card title="Metadata">
+          <MetaGrid metadata={preview.metadata as any} />
+        </Card>
+
+        <div>
+          <CSVPreview FilePreviewProps={preview} />
+          {error && <div className="mt-3 rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">{error}</div>}
+          <div className="mt-4 flex justify-end">
+            <button onClick={handleSubmit} className="rounded-xl bg-black px-5 py-2.5 text-white disabled:opacity-50 dark:bg-white dark:text-black">
+              {busy ? 'Scoring…' : 'Score and Analyze'}
+            </button>
+          </div>
+        </div>
       </div>
-    <div>
-      <button onClick={handleSubmit}>Score and Analyze</button>
-    </div>
-    </div>
+    </Container>
   )
 }

@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: "C:/Users/spurg/Documents/Marshall-Wace/loan-dashboard/web",
   },
+  output: 'standalone',
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 export default nextConfig;

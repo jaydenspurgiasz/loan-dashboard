@@ -5,6 +5,10 @@ import { getCSV } from '@/lib/idb'
 import { getCurrentKey } from '@/lib/idb'
 import { Stats, calcStats, isStats } from '@/lib/stats'
 import Charts from '@/components/Charts'
+import Container from '@/components/Container'
+import Card from '@/components/Card'
+import { FilePreview, getPreview } from '@/lib/fileParse'
+import CSVPreview from '@/components/CSVPreview'
 
 type ChartProps = {
   vintagePDProp: Array<{month: number, PD: number}>;
@@ -19,6 +23,7 @@ export default function Analyze() {
   const [LGD, setLGD] = useState(0.45);
   const [file, setFile] = useState<File | null>(null);
   const [chartData, setChartData] = useState<ChartProps>({ vintagePDProp: emptyVintage, loanDistProp: emptyLoanDist });
+  const [preview, setPreview] = useState<FilePreview>({ head: [], tail: [], metadata: {} as any });
 
   useEffect(() => {
     async function fetchFile() {
@@ -32,6 +37,19 @@ export default function Analyze() {
     }
     fetchFile();
   }, [])
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (file) {
+        const p = await getPreview(file);
+        if (!p) {
+          console.error("Failed to get preview");
+          return;
+        }
+        setPreview(p);
+      }
+    }
+    fetchPreview();
+  }, [file])
   useEffect(() => {
     const fetchStats = async () => {
       if (file) {
@@ -59,15 +77,40 @@ export default function Analyze() {
   }, [stats])
 
   return (
-    <div>
-      <input type="number" value={LGD} onChange={(e) => setLGD(Number(e.target.value))} />
-      <div>EAD: {stats.snapshot.EAD}, EL: {stats.snapshot.EL}, ELR: {stats.snapshot.ELR}</div>
-      <div>
-        <Charts 
-          vintagePDProp={chartData.vintagePDProp} 
-          loanDistProp={chartData.loanDistProp} 
-        />
+    <Container>
+      <div className="grid gap-4 md:grid-cols-5">
+        <Card title="Inputs" className="col-span-1">
+          <label className="text-sm">LGD (%)</label>
+          <input
+            type="number"
+            value={LGD}
+            onChange={(e) => setLGD(Number(e.target.value))}
+            className="mt-2 w-full rounded-xl border px-3 py-2 bg-white dark:bg-neutral-900"
+          />
+        </Card>
+        <Card title="Snapshot" className="col-span-4">
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <div className="rounded-xl border p-3">
+              <div className="text-xs text-neutral-500">EAD</div>
+              <div className="mt-1 font-semibold truncate" title={String(stats.snapshot.EAD)}>{stats.snapshot.EAD}</div>
+            </div>
+            <div className="rounded-xl border p-3">
+              <div className="text-xs text-neutral-500">EL</div>
+              <div className="mt-1 font-semibold truncate" title={String(stats.snapshot.EL)}>{stats.snapshot.EL}</div>
+            </div>
+            <div className="rounded-xl border p-3">
+              <div className="text-xs text-neutral-500">ELR</div>
+              <div className="mt-1 font-semibold truncate" title={String(stats.snapshot.ELR)}>{stats.snapshot.ELR}</div>
+            </div>
+          </div>
+        </Card>
+       </div>
+
+      <div className="mt-6">
+        <Charts vintagePDProp={chartData.vintagePDProp} loanDistProp={chartData.loanDistProp} />
       </div>
-    </div>
+
+      <CSVPreview FilePreviewProps={preview} />
+    </Container>
   )
 }

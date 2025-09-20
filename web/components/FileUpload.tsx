@@ -58,12 +58,27 @@ function FileUpload({onSubmit}: FileUploadProps) {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <label>{statusMap[status]}</label>
-        {status === "error" && <div>{error}</div>}
-        <input type="file" onChange={handleFileChange} id="csv-upload" accept=".csv" disabled={status === "loading" || status === "done"}/>
-        <button type="submit" disabled={status == "loading" || !file}>{status === "loading" ? "Uploading..." : "Upload"}</button>
+      <div className="mx-auto w-full max-w-2xl">
+      <form onSubmit={handleSubmit} className="rounded-2xl border bg-white p-6 shadow-sm dark:bg-neutral-900">
+        <label className="text-sm font-medium">{statusMap[status]}</label>
+        {status === "error" && <div className="mt-2 rounded-lg border border-red-300 bg-red-50 p-2 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">{error}</div>}
+        <div className="mt-3 rounded-2xl border-2 border-dashed p-6 text-center hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">
+          <input className="mx-auto block w-full max-w-xs cursor-pointer rounded-lg border p-2 text-sm file:mr-4 file:rounded-lg file:border file:px-3 file:py-1.5"
+            type="file" onChange={handleFileChange} id="csv-upload" accept=".csv,text/csv"
+            disabled={status === "loading" || status === "done"}/>
+          <p className="mt-2 text-xs text-neutral-500">CSV only • {"<"} 10MB recommended</p>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="submit"
+            disabled={status === "loading" || !file}
+            className="rounded-xl bg-black px-5 py-2.5 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          >
+            {status === "loading" ? "Uploading..." : "Upload"}
+          </button>
+        </div>
       </form>
+    </div>
     </>
   )
 }

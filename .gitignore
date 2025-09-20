@@ -7,6 +7,11 @@
 
 /web/.env.local
 
+/api/__pycache__
+/api/artifacts/__pycache__
+
+/api/loan-api
+
 # dependencies
 /web/node_modules
 /web/.pnp

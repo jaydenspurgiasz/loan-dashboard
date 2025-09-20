@@ -6,6 +6,7 @@ import FileUpload from '@/components/FileUpload';
 import { validateFile } from '@/lib/actions/fileActions';
 import { saveCSV, setCurrentKey } from '@/lib/idb';
 import { set } from 'idb-keyval';
+import Container from '@/components/Container';
 
 
 export default function Home() {
@@ -28,7 +29,26 @@ export default function Home() {
 
   return (
     <div>
-      <FileUpload onSubmit={handleSubmit}/>
+      <Container>
+        <div className="grid gap-10 md:grid-cols-2">
+          <div className="flex flex-col justify-center gap-6">
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight">
+              Turn raw CSVs into risk insight.
+            </h1>
+            <p className="text-neutral-600 dark:text-neutral-300">
+              Upload your portfolio CSV, run validation instantly, preview the data, then analyze.
+            </p>
+            <ul className="mt-2 grid gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+              <li>• Drag-and-drop CSV upload</li>
+              <li>• Schema & value validation</li>
+              <li>• Charts for PD, vintages, exposures</li>
+            </ul>
+          </div>
+          <div>
+            <FileUpload onSubmit={handleSubmit} />
+          </div>
+        </div>
+      </Container>
     </div>
   )
 }
