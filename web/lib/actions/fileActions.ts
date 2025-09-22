@@ -3,7 +3,7 @@
 import sha256 from '@/lib/hash';
 import { saveCSV } from '../idb';
 
-const API = process.env.API_URL;
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export async function validateFile(file: File): Promise<string | null> {
     // Call API/validate endpoint then if valid, return true

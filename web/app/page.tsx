@@ -24,9 +24,10 @@ export default function Home() {
       router.push("/preview");
     } catch (error) {
       console.error("File validation failed:", error);
+      alert("File validation failed. Please try again");
     }
   }
-
+  
   return (
     <div>
       <Container>

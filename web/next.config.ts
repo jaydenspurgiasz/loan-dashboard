@@ -9,9 +9,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: "C:/Users/spurg/Documents/Marshall-Wace/loan-dashboard/web",
   },
-  output: 'standalone',
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://api:8000/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
